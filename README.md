@@ -1,56 +1,129 @@
 # Chainlit RAG Proof of Concept
 
-This project is a simple Proof of Concept (PoC) for a Retrieval-Augmented Generation (RAG) application using [Chainlit](https://docs.chainlit.io/get-started/overview).
+This project is a Proof of Concept (PoC) for a Retrieval-Augmented Generation (RAG) application using [Chainlit](https://docs.chainlit.io/get-started/overview).
 
-It demonstrates how to build a chat application that can:
-- Engage in a general conversation using a Large Language Model (LLM).
-- Augment its knowledge with information from an uploaded PDF file.
-- Allow users to configure settings like the model and temperature.
+## Features
+
+- **General Chat**: Engage in conversations using configurable LLMs
+- **Document Q&A**: Upload PDF files and ask questions about their content
+- **Configurable Settings**: Adjust model, domain expertise, and temperature
+- **Clean Architecture**: Separated concerns with core logic and presentation layers
 
 ## Project Structure
-
-The project has been refactored to promote a clear separation of concerns, making it more maintainable and scalable.
 
 ```
 .
 ├── .gitignore
 ├── pyproject.toml
 ├── README.md
-└── src
-    ├── core
-    │   ├── agent.py      # Core logic for the conversational agent and chat history
-    │   └── rag.py        # Core logic for the RAG chain
-    ├── main.py           # Main entry point for the Chainlit application
-    └── presentation
-        ├── callbacks.py  # Handles user messages and actions (@cl.on_message)
-        └── factory.py      # Creates UI components and handles setup (@cl.on_chat_start)
+└── src/
+    ├── main.py              # Entry point - registers Chainlit decorators
+    ├── core/
+    │   ├── agent.py         # Conversational agent logic
+    │   └── rag.py          # RAG chain implementation
+    └── presentation/
+        ├── callbacks.py     # Message handling (@cl.on_message)
+        └── factory.py       # UI setup (@cl.on_chat_start)
 ```
 
-- **`src/`**: The main source code directory.
-  - **`main.py`**: The entry point that Chainlit uses to run the application. It imports the necessary modules to register the Chainlit decorators.
-  - **`core/`**: Contains the core business logic of the application.
-    - `agent.py`: Manages the setup of the main conversational agent and chat history.
-    - `rag.py`: Manages the setup of the RAG chain for interacting with documents.
-  - **`presentation/`**: Contains the code related to the user interface and user interaction (the "view" layer).
-    - `factory.py`: Responsible for creating and setting up the initial chat interface, settings, and chat profiles.
-    - `callbacks.py`: Contains the callbacks that respond to user actions, such as sending a message or clicking a button.
+## Requirements
 
-## How to Run
+- Python 3.9+
+- [uv](https://github.com/astral-sh/uv) (recommended) or pip
+- Ollama running locally with models (gpt-oss:20b, phi4, etc.)
 
-1.  **Install Dependencies**:
-    Make sure you have Python 3.9+ installed. It's recommended to use a virtual environment.
+## Installation with uv (Recommended)
 
-    ```bash
-    pip install -e .
-    ```
+1. **Install uv** (if not already installed):
+   ```bash
+   curl -LsSf https://astral.sh/uv/install.sh | sh
+   ```
 
-2.  **Run the application**:
-    Use the Chainlit CLI to run the application.
+2. **Clone and navigate to the project**:
+   ```bash
+   cd chainlit-rag-poc
+   ```
 
-    ```bash
-    chainlit run src/main.py -w
-    ```
-    The `-w` flag enables auto-reloading, which is useful for development.
+3. **Install dependencies and create virtual environment**:
+   ```bash
+   uv sync
+   ```
 
-3.  **Open your browser**:
-    Navigate to `http://localhost:8000` to start interacting with the chat application.
+4. **Ensure Ollama is running** with required models:
+   ```bash
+   ollama pull gpt-oss:20b
+   ollama pull phi4
+   ```
+
+## Usage with uv
+
+1. **Run the application**:
+   ```bash
+   uv run chainlit run src/main.py -w
+   ```
+
+2. **Alternative: Activate virtual environment first**:
+   ```bash
+   # Activate the virtual environment
+   source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+   
+   # Then run normally
+   chainlit run src/main.py -w
+   ```
+
+## Installation with pip (Alternative)
+
+1. **Create virtual environment**:
+   ```bash
+   python -m venv .venv
+   source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+   ```
+
+2. **Install dependencies**:
+   ```bash
+   pip install -e .
+   ```
+
+3. **Run the application**:
+   ```bash
+   chainlit run src/main.py -w
+   ```
+
+## Usage
+
+1. **Open your browser**:
+   Navigate to `http://localhost:8000`
+
+2. **Configure settings**:
+   - Choose your preferred model
+   - Set domain expertise
+   - Adjust temperature for creativity
+
+3. **Start chatting**:
+   - Ask general questions for normal conversation
+   - Upload a PDF to enable document-specific Q&A
+
+## Development with uv
+
+- **Add new dependencies**:
+  ```bash
+  uv add package-name
+  ```
+
+- **Add development dependencies**:
+  ```bash
+  uv add --group dev package-name
+  ```
+
+- **Run linting**:
+  ```bash
+  uv run ruff check src/
+  uv run ruff format src/
+  ```
+
+## Troubleshooting
+
+- **Import errors**: Ensure you're running from the project root
+- **Model errors**: Verify Ollama is running and models are available
+- **PDF processing**: Check file size (<20MB) and format (PDF only)
+- **uv issues**: Make sure you have the latest version of uv installed

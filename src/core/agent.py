@@ -1,3 +1,4 @@
+# src/core/agent.py
 import chainlit as cl
 from langchain.schema.runnable.config import RunnableConfig
 from langchain_core.chat_history import InMemoryChatMessageHistory
@@ -10,6 +11,7 @@ from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_ollama import ChatOllama
 
 
+# Global store for chat histories
 store = {}
 
 
@@ -22,34 +24,36 @@ def get_history_by_session_id(session_id: str) -> BaseChatMessageHistory:
 
 def setup_agent(settings):
     """Sets up the general conversational agent based on user settings."""
-    cl.user_session.set("model", settings["model"])
-    cl.user_session.set("domain", settings["domain"])
-    cl.user_session.set("temperature", settings["temperature"])
+    try:
+        # Store settings in user session
+        cl.user_session.set("model", settings.get("model", "gpt-oss:20b"))
+        cl.user_session.set("domain", settings.get("domain", "IT"))
+        cl.user_session.set("temperature", settings.get("temperature", 0.1))
 
-    prompt = ChatPromptTemplate.from_messages(
-        [
+        prompt = ChatPromptTemplate.from_messages([
             (
                 "system",
-                """
-            You are an expert in {domain}.
-            Your task is to answer the question as short as possible
-            """,
+                "You are an expert in {domain}. "
+                "Your task is to answer the question as clearly and helpfully as possible."
             ),
             MessagesPlaceholder("history"),
             ("human", "{question}"),
-        ]
-    )
+        ])
 
-    llm = ChatOllama(
-        model=settings["model"],
-        temperature=float(settings["temperature"]),
-    )
+        llm = ChatOllama(
+            model=settings.get("model", "gpt-oss:20b"),
+            temperature=float(settings.get("temperature", 0.1)),
+        )
 
-    final_chain = RunnableWithMessageHistory(
-        prompt | llm | StrOutputParser(),
-        get_history_by_session_id,
-        input_messages_key="question",
-        history_messages_key="history",
-    )
+        final_chain = RunnableWithMessageHistory(
+            prompt | llm | StrOutputParser(),
+            get_history_by_session_id,
+            input_messages_key="question",
+            history_messages_key="history",
+        )
 
-    cl.user_session.set("final_chain", final_chain)
+        cl.user_session.set("final_chain", final_chain)
+        return True
+    except Exception as e:
+        print(f"Error setting up agent: {e}")
+        return False

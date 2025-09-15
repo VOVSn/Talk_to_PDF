@@ -4,21 +4,26 @@ version = "0.1.0"
 description = "Simple PoC for Chainlit RAG application"
 requires-python = ">=3.9"
 dependencies = [
-    "chainlit",
-    "langchain",
-    "langchain-core",
-    "langchain-community",
-    "langchain-ollama",
-    "pypdf",
-    "faiss-cpu",
-    "sentence-transformers",
+    "chainlit>=1.0.0",
+    "langchain>=0.1.0",
+    "langchain-core>=0.1.0",
+    "langchain-community>=0.0.10",
+    "langchain-ollama>=0.1.0",
+    "pypdf>=4.0.0",
+    "faiss-cpu>=1.7.0",
+    "sentence-transformers>=2.2.0",
 ]
 
 [dependency-groups]
 dev = [
-    "ruff",
+    "ruff>=0.1.0",
 ]
 
 [tool.ruff]
-line-length = 79
-quote-style = "single"
+line-length = 88
+quote-style = "double"
+target-version = "py39"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I"]
+ignore = ["E501"]
