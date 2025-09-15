@@ -3,38 +3,34 @@ graph TD
         A[Chainlit UI]
     end
 
-    subgraph "Application Backend (Docker Container)"
-        B["app.py (Presentation Layer)"]
-        C["Application Layer (Services & Use Cases)"]
-        D["Domain Layer (Entities & Business Logic)"]
-        E["Infrastructure Layer (Adapters)"]
+    subgraph "Application Backend (src)"
+        B[main.py]
+
+        subgraph "Presentation Layer (presentation)"
+            C["factory.py<br/>(@cl.on_chat_start, @cl.on_settings_update)"]
+            D["callbacks.py<br/>(@cl.on_message, @cl.action_callback)"]
+        end
+
+        subgraph "Core Logic (core)"
+            E["agent.py<br/>(setup_agent)"]
+            F["rag.py<br/>(setup_rag_chain, get_rag_chain)"]
+        end
     end
 
     subgraph "External Services"
-        F["Ollama @ 192.168.1.128:11434"]
-        G[PostgreSQL]
-        H[Milvus]
+        G["Ollama LLM Service"]
     end
 
-    A -- "User Interaction" --> B
-    B -- "Calls Use Cases" --> C
-    C -- "Uses Domain Objects" --> D
-    C -- "Depends on Interfaces" --> E
+    A -- "WebSocket Interaction" --> C & D
 
-    subgraph "Infrastructure Implementations"
-        E_Ollama["Ollama Adapter"]
-        E_Postgres["PostgreSQL Adapter"]
-        E_Milvus["Milvus Adapter"]
-    end
+    B -- "Imports & Registers Callbacks" --> C
+    B -- "Imports & Registers Factories" --> D
 
-    E -- "Connects to" --> E_Ollama
-    E -- "Connects to" --> E_Postgres
-    E -- "Connects to" --> E_Milvus
+    C -- "Calls" --> E
+    C -- "Calls" --> F
+    D -- "Calls" --> F
 
-    E_Ollama -- "HTTP Requests" --> F
-    E_Postgres -- "TCP/IP" --> G
-    E_Milvus -- "TCP/IP" --> H
+    E -- "HTTP Requests" --> G
+    F -- "HTTP Requests" --> G
 
-    style F fill:#f9f,stroke:#333,stroke-width:2px
-    style G fill:#ccf,stroke:#333,stroke-width:2px
-    style H fill:#cfc,stroke:#333,stroke-width:2px
+    style G fill:#f9f,stroke:#333,stroke-width:2px
