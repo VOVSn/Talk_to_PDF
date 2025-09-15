@@ -1,0 +1,40 @@
+graph TD
+    subgraph "User Interface"
+        A[Chainlit UI]
+    end
+
+    subgraph "Application Backend (Docker Container)"
+        B["app.py (Presentation Layer)"]
+        C["Application Layer (Services & Use Cases)"]
+        D["Domain Layer (Entities & Business Logic)"]
+        E["Infrastructure Layer (Adapters)"]
+    end
+
+    subgraph "External Services"
+        F["Ollama @ 192.168.1.128:11434"]
+        G[PostgreSQL]
+        H[Milvus]
+    end
+
+    A -- "User Interaction" --> B
+    B -- "Calls Use Cases" --> C
+    C -- "Uses Domain Objects" --> D
+    C -- "Depends on Interfaces" --> E
+
+    subgraph "Infrastructure Implementations"
+        E_Ollama["Ollama Adapter"]
+        E_Postgres["PostgreSQL Adapter"]
+        E_Milvus["Milvus Adapter"]
+    end
+
+    E -- "Connects to" --> E_Ollama
+    E -- "Connects to" --> E_Postgres
+    E -- "Connects to" --> E_Milvus
+
+    E_Ollama -- "HTTP Requests" --> F
+    E_Postgres -- "TCP/IP" --> G
+    E_Milvus -- "TCP/IP" --> H
+
+    style F fill:#f9f,stroke:#333,stroke-width:2px
+    style G fill:#ccf,stroke:#333,stroke-width:2px
+    style H fill:#cfc,stroke:#333,stroke-width:2px

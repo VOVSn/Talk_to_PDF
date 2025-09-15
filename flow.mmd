@@ -1,0 +1,24 @@
+sequenceDiagram
+    participant Browser (User)
+    participant Chainlit_Backend as Chainlit Backend (Presentation)
+    participant FastAPI_Backend as FastAPI Backend (Logic)
+    participant LLM_Service as LLM (Ollama)
+
+    Note over Browser (User): User types "What is AI?" and hits send.
+
+    Browser (User)->>+Chainlit_Backend: Sends message via WebSocket
+    Note over Chainlit_Backend: @cl.on_message is triggered.
+
+    Chainlit_Backend->>+FastAPI_Backend: Makes an HTTP POST request to /chat/stream
+    Note over FastAPI_Backend: Receives a standard REST API call.
+
+    FastAPI_Backend->>+LLM_Service: Sends prompt for generation
+    LLM_Service-->>-FastAPI_Backend: Streams back the response ("AI is...")
+
+    Note over FastAPI_Backend: Forwards the stream as the HTTP response.
+    FastAPI_Backend-->>-Chainlit_Backend: Streams back the HTTP response
+
+    Note over Chainlit_Backend: Receives the HTTP stream from FastAPI.
+    Chainlit_Backend->>-Browser (User): Forwards each chunk via WebSocket
+
+    Note over Browser (User): UI updates in real-time as WebSocket messages arrive.  
